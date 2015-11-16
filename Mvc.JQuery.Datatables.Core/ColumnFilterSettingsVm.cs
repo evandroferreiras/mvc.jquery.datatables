@@ -21,9 +21,9 @@ namespace Mvc.JQuery.DataTables
         public override string ToString()
         {
             var noColumnFilter = new FilterDef(null);
-            this["bUseColVis"] = _vm.ColVis;
+
             this["aoColumns"] = _vm.Columns
-                //.Where(c => c.Visible || c.Filter["sSelector"] != null)
+               // .Where(c => c.Visible)
                 .Select(c => c.Searchable?c.Filter:noColumnFilter).ToArray();
             return new JavaScriptSerializer().Serialize(this);
         }

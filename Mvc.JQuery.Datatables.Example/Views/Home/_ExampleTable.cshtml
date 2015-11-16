@@ -5,20 +5,20 @@
 @using Mvc.JQuery.DataTables
 
 
-<script type="text/javascript" src="//cdn.datatables.net/1.10.0/js/jquery.dataTables.js"></script>
-<link rel="stylesheet" href="//cdn.datatables.net/1.10.0/css/jquery.dataTables.css" />
-<!-- table tools (csv export etc) https://datatables.net/extensions/tabletools -->
+@*<script type="text/javascript" src="//cdn.datatables.net/1.10.9/js/jquery.dataTables.js"></script>
+<script type="text/javascript" src="//cdn.datatables.net/1.10.9/js/dataTables.bootstrap.min.js"></script>
 <script type="text/javascript" src="//cdn.datatables.net/tabletools/2.2.1/js/dataTables.tableTools.min.js"></script>
-<link rel="stylesheet" href="//cdn.datatables.net/tabletools/2.2.1/css/dataTables.tableTools.css" />
-
 <script type="text/javascript" src="/Content/jquery-datatables-column-filter/jquery-ui-timepicker-addon.js"></script>
-<link rel="stylesheet" href="/Content/jquery-datatables-column-filter/jquery-ui-timepicker-addon.css" />
-
-<link rel="stylesheet" href="/Content/jquery-datatables-column-filter/media/js/jquery.dataTables.columnFilter.css" />
 <script type="text/javascript" src="/Content/jquery-datatables-column-filter/media/js/jquery.dataTables.columnFilter.js"></script>
-
-<link rel="stylesheet" href="//cdn.datatables.net/colvis/1.1.1/css/dataTables.colVis.css" />
 <script type="text/javascript" src="//cdn.datatables.net/colvis/1.1.1/js/dataTables.colVis.min.js"></script>
+
+
+<link rel="stylesheet" href="//cdn.datatables.net/1.10.9/css/jquery.dataTables.min.css" />
+<link rel="stylesheet" href="//cdn.datatables.net/tabletools/2.2.1/css/dataTables.tableTools.css" />
+<link rel="stylesheet" href="/Content/jquery-datatables-column-filter/jquery-ui-timepicker-addon.css" />
+<link rel="stylesheet" href="/Content/jquery-datatables-column-filter/media/js/jquery.dataTables.columnFilter.css" />
+<link rel="stylesheet" href="//cdn.datatables.net/colvis/1.1.1/css/dataTables.colVis.css" />
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.9/css/dataTables.bootstrap.min.css" />*@
 
 @{
     var vm = Html.DataTableVm("table-id", (HomeController h) => h.GetUsers(null));
@@ -29,11 +29,10 @@
         $(nRow).attr('data-id', aData[0]);
     }"));
     vm.ColumnFilter = true;
-    vm
-        .FilterOn("Position", new { sSelector = "#custom-filter-placeholder-position" }, new { sSearch = "Tester" }).Select("Engineer", "Tester", "Manager")
-        .FilterOn("Id").NumberRange()
-        .FilterOn("Salary", new { sSelector = "#custom-filter-placeholder-salary" }).NumberRange();
-    //.FilterOn("Number").CheckBoxes(Enum.GetNames(typeof(Numbers)));
+    vm.FilterOn("Position", new {sSelector = "#custom-filter-placeholder-position"}, new {sSearch = "Tester"}).Select("Engineer", "Tester", "Manager");
+    vm.FilterOn("Id").NumberRange();
+    vm.FilterOn("Salary", new { sSelector = "#custom-filter-placeholder-salary" }).NumberRange();
+    vm.FilterOn("Number").CheckBoxes(Enum.GetNames(typeof(Numbers)));
     vm.StateSave = true;
     //vm.DrawCallback = "drawCallback";
     
@@ -41,7 +40,9 @@
     vm.LengthMenu = LengthMenuVm.Default();
     vm.LengthMenu.RemoveAll(t => t.Item2 == 5);
     vm.PageLength = 25; //... and set a default
+    vm.GlobalJsVariableName = "datatablePrincipal";
     vm.ColVis = true;
+    vm.Dom = "<\"LengthMenu\"l>t";
     if (Request.QueryString["lang"] == "de")
     {
         //vm.Language = "{ 'sUrl': '" + Url.Content("~/Content/jquery.dataTables.lang.de-DE.txt") + "' }";
@@ -72,4 +73,5 @@
         return '<em>' + data + '</em>';
     }
 </script>
+
 @Html.Partial("DataTable", vm)

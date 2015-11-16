@@ -1,39 +1,66 @@
-﻿@using System.Data.Odbc
+﻿@using System.Activities.Statements
+@using System.Data.Odbc
 @using System.Linq
 @using Mvc.JQuery.DataTables
 @using Newtonsoft.Json
 @using Newtonsoft.Json.Linq
 @model DataTableConfigVm
-<table id="@Model.Id" class="display @(Model.TableClass ?? DataTableConfigVm.DefaultTableClass ?? "")" @Html.Raw(Model.FixedLayout ? "style='table-layout:fixed'":"")>
-    <thead>
-        @if (Model.ColumnFilter)
-        {
-            <tr>
-                @foreach (var column in Model.Columns)
+
+
+@if (Model.ColVis)
+{
+    <div>
+        <div id="collapsible" data-role="collapsible">
+            <h5>Columns...</h5>
+
+            <fieldset data-role="controlgroup" data-type="horizontal">
+                <legend style="display: none">Horizontal:</legend>
+                @for (int i = 0; i < Model.Columns.Count(); i++)
                 {
-                    <th >@column.DisplayName</th>
+                    <input type="checkbox" name="checkbox-@i" id="checkbox-@i" checked="checked" data-column="@i" />
+                    <label for="checkbox-@i">@Model.Columns.ElementAt(i).DisplayName</label>
+
+
                 }
-            </tr>
-        }
-        @if (!Model.HideHeaders)
-        {
+            </fieldset>
+
+
+        </div>
+
+    </div>
+
+}
+<div data-enhance="false">
+
+    <table id="@Model.Id" class="display @(Model.TableClass ?? DataTableConfigVm.DefaultTableClass ?? "")" @Html.Raw(Model.FixedLayout ? "style='table-layout:fixed'" : "")>
+        <thead>
+            @if (!Model.HideHeaders)
+            {
+                <tr>
+                    @foreach (var column in Model.Columns)
+                    {
+                        <th class="@column.CssClassHeader">
+                            <div style="display: inline">
+                                @column.DisplayName
+                            </div>
+
+                        </th>
+                    }
+                </tr>
+            }
+        </thead>
+        <tbody>
             <tr>
-                @foreach (var column in Model.Columns)
-                {
-                    <th class="@column.CssClassHeader">@column.DisplayName</th>
-                }
+                <td colspan="@Model.Columns.Count()" class="dataTables_empty">
+                    Loading data from server
+                </td>
             </tr>
-        }
-    </thead>
-    <tbody>
-        <tr>
-            <td colspan="@Model.Columns.Count()" class="dataTables_empty">Loading data from server
-            </td>
-        </tr>
-    </tbody>
-</table>
+        </tbody>
+    </table>
+</div>
 
 <script type="text/javascript">
+
     (function setDataTable() {
         if(!window.jQuery || !$.fn.DataTable) {
             setTimeout(setDataTable, 100);
@@ -59,12 +86,9 @@
             }
             options["bAutoWidth"] = Model.AutoWidth;
             options["sAjaxSource"] = Model.AjaxUrl;
-            if (Model.TableTools)
-            {
-                options["oTableTools"] = new JRaw("{ 'sSwfPath': '//cdn.datatables.net/tabletools/2.2.1/swf/copy_csv_xls_pdf.swf' }");
-            }
+
             options["fnServerData"] = new JRaw(
-                "function(sSource, aoData, fnCallback) { " + 
+                "function(sSource, aoData, fnCallback) { " +
                 "    var ajaxOptions = { 'dataType': 'json', 'type': 'POST', 'url': sSource, 'data': aoData, 'success': fnCallback }; " +
                 (Model.AjaxErrorHandler == null ? "" : ("ajaxOptions['error'] = " + Model.AjaxErrorHandler) + "; ") +
                 "    $.ajax(ajaxOptions);" +
@@ -86,18 +110,44 @@
             {
                 options["fnDrawCallback"] = new JRaw(Model.DrawCallback);
             }
-            
+
         }
 
-        var dt = $table.dataTable(@Html.Raw(options.ToString(Formatting.Indented)));
-        @if (Model.ColumnFilter)
+        var dt = $table.DataTable(@Html.Raw(options.ToString(Formatting.Indented)));
+
+        @if (Model.ColVis)
         {
-            @Html.Raw("dt.columnFilter(" + Model.ColumnFilterVm + ");")
+
         }
-        
+
         @if (Model.GlobalJsVariableName != null)
         {
             @Html.Raw("window['" + Model.GlobalJsVariableName + "'] = dt;")
         }
+
+
+
     })();
+
+    $('input[id*="checkbox-"]').change(function(){
+
+        // Get the column API object
+        var column = @(MvcHtmlString.Create(Model.GlobalJsVariableName)).column($(this).attr('data-column'));
+
+        // Toggle the visibility
+        column.visible(!column.visible());
+    });
+
+    function LoadColumns() {
+        var a = @(MvcHtmlString.Create(Model.GlobalJsVariableName)).columns().visible();
+        for (var i=0; i<a.length; i++) {
+            console.log(a[i]);
+            $("input[data-column="+i+"]").prop("checked",a[i]).checkboxradio("refresh");
+        }      
+    }
+
+
+
+    $( "#collapsible" ).on( "collapsibleexpand", function( event, ui ) { LoadColumns(); } );
+
 </script>

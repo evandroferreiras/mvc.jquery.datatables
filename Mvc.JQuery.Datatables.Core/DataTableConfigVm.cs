@@ -30,7 +30,7 @@ namespace Mvc.JQuery.DataTables
             this.Columns = columns;
             this.ShowSearch = true;
             this.ShowPageSizes = true;
-            this.TableTools = true;
+            
             ColumnFilterVm = new ColumnFilterSettingsVm(this);
             AjaxErrorHandler = 
                 "function(jqXHR, textStatus, errorThrown)" + 
@@ -63,7 +63,7 @@ namespace Mvc.JQuery.DataTables
 
         public ColumnFilterSettingsVm ColumnFilterVm { get; set; }
 
-        public bool TableTools { get; set; }
+        
 
         public bool AutoWidth { get; set; }
 
@@ -89,10 +89,8 @@ namespace Mvc.JQuery.DataTables
                     return _dom;
 
                 string str = "";
-                if (this.ColVis)
-                    str += "C";
-                if (this.TableTools)
-                    str += "T<\"clear\">";
+
+
                 if (this.ShowPageSizes)
                     str += "l";
                 if (this.ShowSearch)
